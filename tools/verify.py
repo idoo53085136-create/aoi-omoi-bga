@@ -19,7 +19,10 @@ def probe(p):
 
 
 def pcm(p, ss=0.0, dur=None, sr=8000):
-    cmd = ['ffmpeg', '-v', 'error', '-ss', f'{ss:.4f}', '-i', p] + (['-t', f'{dur:.4f}'] if dur else []) + ['-ac', '1', '-ar', str(sr), '-f', 'f32le', '-']
+    # (r31) no -ss at all when decoding from the start: an input seek, even to 0, made ffmpeg ignore the AAC edit list
+    # (the 1024-sample priming skip), so both tracks read 21.3 ms late and a wrong -itsoffset "fix" in export.py passed
+    # this check while real players (which honour the edit list) heard the audio 21.3 ms EARLY
+    cmd = ['ffmpeg', '-v', 'error'] + (['-ss', f'{ss:.4f}'] if ss else []) + ['-i', p] + (['-t', f'{dur:.4f}'] if dur else []) + ['-ac', '1', '-ar', str(sr), '-f', 'f32le', '-']
     return np.frombuffer(subprocess.run(cmd, capture_output=True, check=True).stdout, np.float32)
 
 

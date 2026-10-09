@@ -111,17 +111,18 @@ def main():
         # full export from 0: bit-exact audio copy (build/audio.mp4 already carries the one-time -7.3 dB; never re-apply).
         # test clips starting later: AAC packets can't be cut sample-accurately with copy (~23 ms shift), so the review clip's
         # audio is re-encoded at 256k from the same source (format only; no level / EQ change). Never ship a clip as the final.
-        # The re-encode's 1024-sample AAC priming is not skipped on decode here (measured +21.3 ms at 48 kHz with
-        # tools/verify.py), so the trim starts 1024 samples later to compensate.
+        # (r31) the trim starts exactly at f0/60: the "+1024 samples" compensation that used to be here came from the same
+        # verify.py -ss mis-measurement (the re-encode's priming IS skipped by real decoders through its edit list).
         ac = ['-c:a', 'copy'] if f0 == 0 else ['-c:a', 'aac', '-b:a', '256k']
         sr = int(subprocess.run(['ffprobe', '-v', 'error', '-select_streams', 'a', '-show_entries', 'stream=sample_rate', '-of', 'csv=p=0', a.audio],
                                 capture_output=True, text=True).stdout.strip() or 48000)
         # build/audio.mp4 starts with 1024 samples of AAC encoder priming that its own edit list skips. A plain stream copy
-        # drops that edit list, so the copied audio played 21.3 ms late (measured with tools/verify.py). Shifting the input
-        # by -1024/sr makes the muxer write a new edit list that skips the priming again; the audio stays bit-exact.
-        prime = ['-itsoffset', f'{-1024 / sr:.7f}'] if f0 == 0 else []
+        # KEEPS that skip (the first packet comes out at pts -1024 and the muxer writes elst media_time 1024), so no offset.
+        # (r31: an -itsoffset -1024/sr here, added after a mis-measurement by verify.py's -ss 0 decode, made the muxer
+        # skip 2048 samples: every export up to r29 played its audio 21.3 ms early in real players.)
+        prime = []
         subprocess.run(['ffmpeg', '-y', '-v', 'error', '-i', silent, *prime, '-i', a.audio, '-map', '0:v', '-map', '1:a', '-c:v', 'copy', *ac,
-                        *(['-af', f'atrim=start={f0 / 60 + 1024 / sr:.6f},asetpts=PTS-STARTPTS'] if f0 else []),
+                        *(['-af', f'atrim=start={f0 / 60:.6f},asetpts=PTS-STARTPTS'] if f0 else []),
                         '-t', f'{n / 60:.6f}', '-movflags', '+faststart', part], check=True)
     if os.path.exists(a.out):
         prev = a.out.replace('.mp4', '_prev.mp4')
