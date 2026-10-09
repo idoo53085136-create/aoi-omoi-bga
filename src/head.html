@@ -1,0 +1,33 @@
+<title>AOI OMOI BGA</title>
+<style>
+:root{color-scheme:dark;--ink:#04378b;--mint:#3bedcf;--sea:#0a9ef7;--deep:#0771e4;--cream:#fffff4;--ui:#fffff4;--ui-dim:rgba(255,255,244,.7);
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{height:100%}
+body{height:100%;margin:0;background:#04378b;color:var(--ui);font-family:"M PLUS Rounded 1c","Hiragino Maru Gothic ProN","PingFang SC","Noto Sans SC",system-ui,sans-serif;overflow:hidden}
+#wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+#gl{width:min(100vw,177.78vh);height:min(56.25vw,100vh);display:block;background:var(--ink)}
+#start{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(4,55,139,.35);border:0;color:var(--cream);cursor:pointer;font:inherit}
+#start b{font-size:clamp(28px,4vw,56px);letter-spacing:.12em;font-weight:800;color:var(--cream);text-shadow:0 3px 0 var(--ink)}
+#start span{font-size:15px;color:var(--ui)}
+#start:focus-visible{outline:3px solid var(--mint);outline-offset:-6px}
+#bar{position:absolute;left:0;right:0;bottom:0;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));display:flex;gap:12px;align-items:center;background:linear-gradient(transparent,rgba(4,55,139,.75));opacity:0;transition:opacity .4s}
+#wrap:hover #bar,#bar:focus-within{opacity:1}
+#bar button{background:var(--cream);color:var(--ink);border:0;border-radius:999px;padding:6px 14px;font:inherit;font-weight:700;cursor:pointer}
+#bar button:focus-visible{outline:3px solid var(--mint)}
+#seek{flex:1;accent-color:var(--mint)}
+#tc{font-variant-numeric:tabular-nums;min-width:110px;text-align:right;color:var(--ui-dim)}
+#err{position:absolute;inset:auto 16px 60px 16px;color:#ffd7d7;font-size:14px}
+@media (max-width:600px){#tc{min-width:0;font-size:12px}#bar{gap:8px;padding-left:16px;padding-right:16px}}
+</style>
+<div id="wrap">
+  <canvas id="gl" aria-label="AOI OMOI 天空图形 BGA 动画"></canvas>
+  <button id="start" aria-label="播放"><b>AOI OMOI</b><span>点击播放（带声音）</span></button>
+  <div id="bar">
+    <button id="pp">暂停</button>
+    <input id="seek" type="range" min="0" max="252.65" step="0.01" value="0" aria-label="进度">
+    <span id="tc">0:00.00 / 4:12.65</span>
+    <button id="fs">全屏</button>
+  </div>
+  <div id="err"></div>
+</div>
+<script>
