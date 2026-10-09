@@ -1,0 +1,6 @@
+build/
+renders/
+research/
+__pycache__/
+*.mp4
+*.wav
