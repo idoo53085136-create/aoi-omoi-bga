@@ -1,6 +1,7 @@
 # AOI OMOI · BGA / MV
 
 原创 Happycore《AOI OMOI》的 MV（BGA）制作源码。
+- **成片**：[B站观看](https://www.bilibili.com/video/BV1XPp86hE7u)
 
 - **音乐**：idoo。音频不包含在本仓库中。
 - **MV 策划 / 导演**：idoo
